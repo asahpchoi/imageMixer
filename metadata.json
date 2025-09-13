@@ -1,0 +1,7 @@
+{
+  "name": "Gemini Image Mixer",
+  "description": "An application to upload photos, take pictures, or draw on a canvas, and then use a prompt to mix them all into a single new image using the Gemini API.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
