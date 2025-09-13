@@ -10,15 +10,19 @@ interface CameraCaptureProps {
 
 export const CameraCapture: React.FC<CameraCaptureProps> = ({ onImageAdd }) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const startCamera = useCallback(async () => {
     setError(null);
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        video: { facingMode },
       });
       setStream(mediaStream);
       if (videoRef.current) {
@@ -28,7 +32,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onImageAdd }) => {
       setError('Could not access the camera. Please check permissions.');
       console.error('Camera access error:', err);
     }
-  }, []);
+  }, [facingMode, stream]);
 
   const stopCamera = useCallback(() => {
     if (stream) {
@@ -53,6 +57,12 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onImageAdd }) => {
     }
   }, [onImageAdd]);
   
+  useEffect(() => {
+    if (stream) {
+      startCamera();
+    }
+  }, [facingMode]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -80,6 +90,9 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onImageAdd }) => {
             <Button onClick={capturePhoto}>
               <Camera className="mr-2" />
               Capture Photo
+            </Button>
+            <Button onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')} variant="outline">
+              Switch Camera
             </Button>
             <Button onClick={stopCamera} variant="outline">
               Stop Camera

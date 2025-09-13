@@ -13,7 +13,7 @@ const PreviewBox: React.FC<{
   image: ImageSource;
   onRemove: (id: string) => void;
 }> = ({ image, onRemove }) => (
-  <div className="relative aspect-square bg-gray-700/50 rounded-lg group overflow-hidden">
+  <div className="relative aspect-square bg-dark/50 rounded-lg group overflow-hidden">
     <img src={image.dataUrl} alt={`Source ${image.type}`} className="object-cover w-full h-full" />
     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
         <button
@@ -30,9 +30,9 @@ const PreviewBox: React.FC<{
 
 export const ImagePreviewGrid: React.FC<ImagePreviewGridProps> = ({ images, onRemove }) => {
   return (
-    <Card className="bg-gray-800 border-gray-700">
+    <Card className="bg-light/10 border-light/20 shadow-lg rounded-2xl">
       <CardHeader>
-        <CardTitle>Step 1: Your Image Sources ({images.length})</CardTitle>
+        <CardTitle>Your Image Sources ({images.length})</CardTitle>
       </CardHeader>
       <CardContent>
         {images.length > 0 ? (
@@ -42,10 +42,10 @@ export const ImagePreviewGrid: React.FC<ImagePreviewGridProps> = ({ images, onRe
             ))}
           </div>
         ) : (
-          <div className="text-center text-gray-400 py-8 border-2 border-dashed border-gray-600 rounded-lg">
+          <div className="text-center text-light/50 py-8 border-2 border-dashed border-light/20 rounded-lg">
             <Image className="mx-auto h-12 w-12" />
             <p className="mt-2 font-semibold">Add images to get started</p>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-light/40">
               Use the tabs below to upload, capture, or draw.
             </p>
           </div>

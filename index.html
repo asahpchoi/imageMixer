@@ -4,8 +4,27 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gemini Image Mixer</title>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Nunito', 'sans-serif'],
+            },
+            colors: {
+              primary: '#FF6B6B',
+              secondary: '#FFD93D',
+              accent: '#6BFFB8',
+              dark: '#2C3E50',
+              light: '#ECF0F1',
+            },
+          },
+        },
+      };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
   <script type="importmap">
 {
@@ -18,7 +37,7 @@
 }
 </script>
 </head>
-  <body class="bg-gray-900 text-white">
+  <body class="">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
