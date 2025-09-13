@@ -1,61 +1,39 @@
-import { GoogleGenAI, Modality, Part } from "@google/genai";
 import { ImageSource } from '../types';
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable is not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-function dataUrlToPart(dataUrl: string, mimeType: string): Part {
-  return {
-    inlineData: {
-      mimeType,
-      data: dataUrl.split(',')[1],
-    },
-  };
-}
+const API_URL = '/api';
 
 export async function mixImages(images: ImageSource[], prompt: string): Promise<string | null> {
-  const imageParts = images.map(img => dataUrlToPart(img.dataUrl, img.mimeType));
-  const textPart: Part = { text: prompt };
-
-  const allParts: Part[] = [...imageParts, textPart];
-
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-image-preview',
-    contents: {
-      parts: allParts,
+  const response = await fetch(`${API_URL}/mix`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
-    config: {
-      responseModalities: [Modality.IMAGE, Modality.TEXT],
-    },
+    body: JSON.stringify({ images, prompt }),
   });
 
-  if (response.candidates && response.candidates[0].content && response.candidates[0].content.parts) {
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
-        return part.inlineData.data;
-      }
-    }
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to generate image.');
   }
 
-  return null;
+  const result = await response.json();
+  return result.image;
 }
 
 export async function optimizePrompt(prompt: string): Promise<string | null> {
-  const fullPrompt = `You are an expert in writing prompts for generative AI image models. Your task is to take a user's prompt and rewrite it to be more descriptive, detailed, and effective for generating high-quality images. The rewritten prompt should be a single, concise paragraph. Do not add any preamble or explanation, just provide the rewritten prompt.\n\nUser prompt: "${prompt}"\n\nRewritten prompt:`;
-
-  const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash',
-    contents: {
-      parts: [{ text: fullPrompt }],
+  const response = await fetch(`${API_URL}/optimize`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
+    body: JSON.stringify({ prompt }),
   });
 
-  if (response.candidates && response.candidates[0].content && response.candidates[0].content.parts) {
-    return response.candidates[0].content.parts[0].text || null;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to optimize prompt.');
   }
 
-  return null;
+  const result = await response.json();
+  return result.prompt;
 }
