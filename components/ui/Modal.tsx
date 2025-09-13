@@ -15,7 +15,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-      <Card className="bg-gray-800 border-gray-700 w-full max-w-2xl">
+      <Card className="bg-white border-gray-200 w-full max-w-2xl text-black max-h-[80vh] overflow-y-auto">
         <CardHeader className="flex justify-between items-center">
           <CardTitle>{title}</CardTitle>
           <Button onClick={onClose} size="sm" variant="ghost">X</Button>

@@ -7,20 +7,34 @@ import { Textarea } from './components/ui/Textarea';
 import { Label } from './components/ui/Label';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/Card';
 import { ImageSource } from './types';
-import { mixImages, optimizePrompt, generateSimilarPrompts } from './services/geminiService';
+import { mixImages, optimizePrompt } from './services/geminiService';
 import { LoaderCircle } from './components/ui/Icons';
 import { Modal } from './components/ui/Modal';
+import { PromptBuilderModal } from './components/ui/PromptBuilderModal';
+
+const OptimizedPromptModalContent: React.FC<{prompt: string, onUse: (prompt: string) => void}> = ({prompt, onUse}) => {
+    const [editedPrompt, setEditedPrompt] = useState(prompt);
+
+    return (
+        <div className="flex flex-col gap-4">
+            <Textarea value={editedPrompt} onChange={(e) => setEditedPrompt(e.target.value)} className="bg-dark border-2 border-light/20 rounded-lg text-light" />
+            <Button onClick={() => onUse(editedPrompt)} size="sm" className="bg-secondary hover:bg-secondary/80 text-dark font-bold rounded-full shadow-md">
+                Use This Prompt
+            </Button>
+        </div>
+    )
+}
 
 const App: React.FC = () => {
   const [images, setImages] = useState<ImageSource[]>([]);
   const [prompt, setPrompt] = useState<string>('Create a 1/7 scale commercialized figure of the character in the illustration, in a realistic style and environment. Place the figure on a computer desk, using a circular transparent acrylic base without any text. On the computer screen, display the ZBrush modeling process of the figure. Next to the computer screen, place a BANDAl-style toy packaging box printed with the original artwork');
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
   const [mixedImage, setMixedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<{ title: string; content: React.ReactNode } | null>(null);
+  const [isPromptBuilderOpen, setIsPromptBuilderOpen] = useState(false);
 
   const addImage = useCallback((newImage: Omit<ImageSource, 'id'>) => {
     const imageWithId: ImageSource = {
@@ -58,36 +72,6 @@ const App: React.FC = () => {
     }
   };
 
-  const handleGenerateSimilarPrompts = async () => {
-    if (!prompt) return;
-    setIsGenerating(true);
-    try {
-      const result = await generateSimilarPrompts(prompt);
-      if (result) {
-        const prompts = result.split(/\n\d+\. /).filter(p => p.trim() !== '');
-        setModalContent({
-          title: 'Similar Ideas',
-          content: (
-            <div className="flex flex-col gap-4">
-              {prompts.map((p, i) => (
-                <div key={i} className="flex justify-between items-center bg-dark/50 p-2 rounded-lg">
-                  <p className="text-light text-sm">{p}</p>
-                  <Button onClick={() => { setPrompt(p); setIsModalOpen(false); }} size="sm" className="bg-secondary hover:bg-secondary/80 text-dark font-bold rounded-full shadow-md">Use</Button>
-                </div>
-              ))}
-            </div>
-          )
-        });
-        setIsModalOpen(true);
-      }
-    } catch (e) {
-      console.error(e);
-      setError(e instanceof Error ? e.message : "An unknown error occurred while generating prompts.");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   const handleOptimizePrompt = async () => {
     if (!prompt) return;
     setIsOptimizing(true);
@@ -96,14 +80,7 @@ const App: React.FC = () => {
       if (result) {
         setModalContent({
           title: 'Optimized Prompt',
-          content: (
-            <div className="flex flex-col gap-4">
-              <p className="text-light">{result}</p>
-              <Button onClick={() => { setPrompt(result); setIsModalOpen(false); }} size="sm" className="bg-secondary hover:bg-secondary/80 text-dark font-bold rounded-full shadow-md">
-                Use This Prompt
-              </Button>
-            </div>
-          )
+          content: <OptimizedPromptModalContent prompt={result} onUse={(p) => { setPrompt(p); setIsModalOpen(false); }} />
         });
         setIsModalOpen(true);
       }
@@ -155,14 +132,18 @@ const App: React.FC = () => {
           <CardContent className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <Label htmlFor="prompt">Mixing Instruction</Label>
-              <Button onClick={handleOptimizePrompt} disabled={!prompt || isOptimizing} size="sm" variant="outline" className="bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-dark rounded-full shadow-md">
-                {isOptimizing && <LoaderCircle className="animate-spin mr-2" />}
-                {isOptimizing ? 'Optimizing...' : 'Optimize Prompt'}
-              </Button>
-              <Button onClick={handleGenerateSimilarPrompts} disabled={!prompt || isGenerating} size="sm" variant="outline" className="bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-dark rounded-full shadow-md">
-                {isGenerating && <LoaderCircle className="animate-spin mr-2" />}
-                {isGenerating ? 'Generating...' : 'Generate Ideas'}
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={handleOptimizePrompt} disabled={!prompt || isOptimizing} size="sm" variant="outline" className="bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-dark rounded-full shadow-md">
+                  {isOptimizing && <LoaderCircle className="animate-spin mr-2" />}
+                  {isOptimizing ? 'Optimizing...' : 'Optimize Prompt'}
+                </Button>
+                <Button onClick={() => setIsPromptBuilderOpen(true)} size="sm" variant="outline" className="bg-transparent border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-dark rounded-full shadow-md">
+                  Prompt Builder
+                </Button>
+                <Button onClick={() => setPrompt('')} disabled={!prompt} size="sm" variant="outline" className="bg-transparent border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-dark rounded-full shadow-md">
+                  Clear
+                </Button>
+              </div>
             </div>
             <Textarea
               id="prompt"
@@ -195,6 +176,13 @@ const App: React.FC = () => {
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalContent?.title || ''}>
           {modalContent?.content}
         </Modal>
+        <PromptBuilderModal 
+          isOpen={isPromptBuilderOpen} 
+          onClose={() => setIsPromptBuilderOpen(false)} 
+          onPromptCreate={(newPrompt) => {
+            setPrompt(newPrompt);
+          }}
+        />
       </main>
       <footer className="text-center p-4 text-gray-500 text-sm">
         <p>Powered by Gemini</p>
