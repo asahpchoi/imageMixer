@@ -12,8 +12,13 @@ export async function mixImages(images: ImageSource[], prompt: string): Promise<
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to generate image.');
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.indexOf('application/json') !== -1) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to generate image.');
+    } else {
+      throw new Error('Failed to generate image. The server returned an unexpected response.');
+    }
   }
 
   const result = await response.json();
@@ -30,8 +35,13 @@ export async function optimizePrompt(prompt: string): Promise<string | null> {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to optimize prompt.');
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.indexOf('application/json') !== -1) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to optimize prompt.');
+    } else {
+      throw new Error('Failed to optimize prompt. The server returned an unexpected response.');
+    }
   }
 
   const result = await response.json();

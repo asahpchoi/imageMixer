@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { ImageInputTabs } from './components/ImageInputTabs';
 import { ImagePreviewGrid } from './components/ImagePreviewGrid';
@@ -67,16 +67,43 @@ const App: React.FC = () => {
   const [isPromptEditorOpen, setIsPromptEditorOpen] = useState(false);
   
 
+  useEffect(() => {
+    try {
+      const storedImages = localStorage.getItem('generatedImages');
+      if (storedImages) {
+        setImages(JSON.parse(storedImages));
+      }
+    } catch (error) {
+      console.error("Failed to load images from local storage", error);
+    }
+  }, []);
+
   const addImage = useCallback((newImage: Omit<ImageSource, 'id'>) => {
     const imageWithId: ImageSource = {
         ...newImage,
         id: `${Date.now()}-${Math.random()}`
     };
-    setImages(prevImages => [...prevImages, imageWithId]);
+    setImages(prevImages => {
+        const updatedImages = [...prevImages, imageWithId];
+        try {
+          localStorage.setItem('generatedImages', JSON.stringify(updatedImages));
+        } catch (error) {
+          console.error("Failed to save images to local storage", error);
+        }
+        return updatedImages;
+    });
   }, []);
 
   const removeImage = useCallback((id: string) => {
-    setImages(prevImages => prevImages.filter(img => img.id !== id));
+    setImages(prevImages => {
+        const updatedImages = prevImages.filter(img => img.id !== id);
+        try {
+          localStorage.setItem('generatedImages', JSON.stringify(updatedImages));
+        } catch (error) {
+          console.error("Failed to save images to local storage", error);
+        }
+        return updatedImages;
+    });
   }, []);
 
   const handleMixImages = async () => {
@@ -91,7 +118,13 @@ const App: React.FC = () => {
     try {
       const result = await mixImages(images, prompt);
       if (result) {
-        setMixedImage(`data:image/png;base64,${result}`);
+        const newImageSrc = `data:image/png;base64,${result}`;
+        setMixedImage(newImageSrc);
+        addImage({
+          type: 'generated',
+          dataUrl: newImageSrc,
+          mimeType: 'image/png'
+        });
       } else {
         setError("Failed to generate image. The model might not have returned an image.");
       }

@@ -1,5 +1,5 @@
 
-export type InputMode = 'upload' | 'camera' | 'draw';
+export type InputMode = 'upload' | 'camera' | 'draw' | 'generated';
 
 export interface ImageSource {
   id: string;
