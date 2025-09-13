@@ -47,7 +47,7 @@ export const ImageInputTabs: React.FC<ImageInputTabsProps> = ({ onImageAdd }) =>
                 } group inline-flex items-center py-2 px-1 border-b-2 font-medium text-sm focus:outline-none`}
               >
                 <tab.icon className="mr-2 h-5 w-5" />
-                <span>{tab.label}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
             ))}
           </nav>

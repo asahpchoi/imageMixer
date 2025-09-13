@@ -42,6 +42,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onImageAdd }) => {
     if (canvas) {
       const context = canvas.getContext('2d');
       if (context) {
+        context.fillStyle = 'black';
+        context.fillRect(0, 0, canvas.width, canvas.height);
         context.lineCap = 'round';
         context.strokeStyle = '#FFFFFF';
         context.lineWidth = 5;
@@ -90,6 +92,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onImageAdd }) => {
   const clearCanvas = useCallback(() => {
     if (ctx && canvasRef.current) {
         ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
         setHasDrawing(false);
     }
   }, [ctx]);
@@ -131,7 +135,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onImageAdd }) => {
         ref={canvasRef}
         width="350"
         height="250"
-        className="bg-gray-700 rounded-lg border border-gray-600 touch-none w-full max-w-md aspect-[7/5]"
+        className="bg-black rounded-lg border border-gray-600 touch-none w-full max-w-md aspect-[7/5]"
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}

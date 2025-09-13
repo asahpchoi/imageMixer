@@ -58,7 +58,7 @@ app.post('/optimize', async (req, res) => {
   const { prompt } = req.body;
 
   try {
-    const fullPrompt = `You are an expert in writing prompts for generative AI image models. Your task is to take a user's prompt and rewrite it to be more descriptive, detailed, and effective for generating high-quality images. The rewritten prompt should be a single, concise paragraph. Do not add any preamble or explanation, just provide the rewritten prompt.\n\nUser prompt: "${prompt}"\n\nRewritten prompt:`;
+    const fullPrompt = `You are an expert in writing prompts for generative AI image models. Your task is to take a user's prompt and rewrite it to be more descriptive, detailed, and effective for generating high-quality images. The rewritten prompt should be a single, concise paragraph. Always mentions about based on the provided images, Do not add any preamble or explanation, just provide the rewritten prompt.\n\nUser prompt: "${prompt}"\n\nRewritten prompt:`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
@@ -68,7 +68,9 @@ app.post('/optimize', async (req, res) => {
     });
 
     if (response.candidates && response.candidates[0].content && response.candidates[0].content.parts) {
-      res.json({ prompt: response.candidates[0].content.parts[0].text || null });
+      const optimizedPrompt = response.candidates[0].content.parts[0].text || '';
+      const finalPrompt = `${optimizedPrompt}`;
+      res.json({ prompt: finalPrompt });
       return;
     }
 

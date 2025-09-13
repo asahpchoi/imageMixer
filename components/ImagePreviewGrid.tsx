@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { ImageSource } from '../types';
@@ -13,24 +12,28 @@ const PreviewBox: React.FC<{
   image: ImageSource;
   onRemove: (id: string) => void;
 }> = ({ image, onRemove }) => (
-  <div className="relative aspect-square bg-dark/50 rounded-lg group overflow-hidden">
-    <img src={image.dataUrl} alt={`Source ${image.type}`} className="object-cover w-full h-full" />
-    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-        <button
-          onClick={() => onRemove(image.id)}
-          className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 hover:bg-red-500/80 transition-colors"
-          aria-label={`Remove image`}
-        >
-          <X className="w-4 h-4" />
-        </button>
+  <div className="relative group aspect-square">
+    <img
+      src={image.dataUrl}
+      alt="Thumbnail"
+      className="w-full h-full object-cover rounded-lg transition-transform duration-300 ease-in-out group-hover:scale-105"
+    />
+    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out rounded-lg flex items-center justify-center">
+      <span className="text-white text-sm font-medium capitalize">{image.type}</span>
     </div>
+    <button
+      onClick={() => onRemove(image.id)}
+      className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out hover:bg-red-500"
+      aria-label="Remove image"
+    >
+      <X className="h-4 w-4" />
+    </button>
   </div>
 );
 
-
 export const ImagePreviewGrid: React.FC<ImagePreviewGridProps> = ({ images, onRemove }) => {
   return (
-    <Card className="bg-light/10 border-light/20 shadow-lg rounded-2xl">
+    <Card className="bg-dark/50 border-primary/30 shadow-lg rounded-2xl">
       <CardHeader>
         <CardTitle>Your Image Sources ({images.length})</CardTitle>
       </CardHeader>
@@ -46,7 +49,7 @@ export const ImagePreviewGrid: React.FC<ImagePreviewGridProps> = ({ images, onRe
             <Image className="mx-auto h-12 w-12" />
             <p className="mt-2 font-semibold">Add images to get started</p>
             <p className="mt-1 text-sm text-light/40">
-              Use the tabs below to upload, capture, or draw.
+              Use the tabs to upload, capture, or draw.
             </p>
           </div>
         )}
